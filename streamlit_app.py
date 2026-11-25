@@ -11,6 +11,7 @@ l'export du prompt + dossier JSON pour une IA externe.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -20,6 +21,20 @@ import json
 
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
+
+
+def _bridge_secrets() -> None:
+    """En ligne (Streamlit Cloud), recopie les Secrets dans l'environnement pour
+    que la configuration (qui lit os.environ / .env) fonctionne sans fichier .env."""
+    try:
+        for k in ("TURFBZH_API_KEY", "TURFBZH_BASE_URL", "PMU_ENABLED", "LETROT_ENABLED"):
+            if not os.environ.get(k) and k in st.secrets:
+                os.environ[k] = str(st.secrets[k])
+    except Exception:  # noqa: BLE001 - pas de secrets en local : on ignore
+        pass
+
+
+_bridge_secrets()
 
 from hippique.collect import Collector  # noqa: E402
 from hippique.config import load_settings  # noqa: E402

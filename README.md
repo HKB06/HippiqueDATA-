@@ -1,7 +1,6 @@
-# 🐎 HippiquePredictor — méthode V5 (trot attelé)
+# 🐎 HippiquePredictor — méthode (trot attelé)
 
-Analyse automatisée des courses de **trot attelé françaises** selon la méthode
-« PROMPT V5 ». Pour chaque course, l'outil fournit :
+Analyse automatisée des courses de **trot attelé françaises** selon la méthode Pour chaque course, l'outil fournit :
 
 1. **1 cheval recommandé**
 2. **2 opposants**
@@ -75,6 +74,24 @@ python main.py --json out/jour.json     # export JSON
 Options principales : `--no-enrich`, `--no-actor-stats`, `--enrich-depth N`,
 `--no-history`, `--no-france-filter`, `--prompt`.
 
+## Déploiement en ligne (Streamlit Community Cloud)
+
+L'app peut être publiée gratuitement et se met à jour à chaque `git push`.
+
+1. Aller sur [share.streamlit.io](https://share.streamlit.io) et se connecter avec GitHub.
+2. **Create app → Deploy a public app from GitHub** :
+   - Repository : `HKB06/HippiqueDATA-`
+   - Branch : `main`
+   - Main file path : `streamlit_app.py`
+3. **Advanced settings → Secrets** : coller (voir `.streamlit/secrets.toml.example`)
+   ```toml
+   TURFBZH_API_KEY = "tbz_live_xxxxxxxx"
+   ```
+4. **Deploy**. L'URL publique est de la forme `https://<nom>.streamlit.app`.
+
+La clé API reste dans les *Secrets* (jamais dans le dépôt). En local, elle est
+lue depuis `.env` ; en ligne, depuis les Secrets.
+
 ## Structure
 
 ```
@@ -89,8 +106,3 @@ src/hippique/
 main.py              # point d'entrée CLI
 streamlit_app.py     # application web
 ```
-
-## Avertissement
-
-Outil d'aide à l'analyse à but informatif. Les paris comportent un risque ;
-rien ne garantit un résultat. Jouez de manière responsable.
