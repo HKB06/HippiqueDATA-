@@ -62,20 +62,23 @@ CRIT_GROUPS = [
 # Services (caches)
 # --------------------------------------------------------------------------- #
 @st.cache_resource(show_spinner=False)
-def get_services():
-    settings = load_settings()
-    return settings, Collector(settings), V5Engine()
+def get_collector():
+    return Collector(load_settings())
+
+
+@st.cache_resource(show_spinner=False)
+def get_engine():
+    return V5Engine()
 
 
 @st.cache_data(show_spinner=False)
 def get_races(date: str, france_only: bool):
-    _, col, _ = get_services()
-    return col.attele_races(date, france_only=france_only)
+    return get_collector().attele_races(date, france_only=france_only)
 
 
 @st.cache_data(show_spinner=False)
 def analyze(date, code, hippodrome, enrich, depth, actor, with_history):
-    _, col, eng = get_services()
+    col, eng = get_collector(), get_engine()
     dossier = col.build_race(
         date, code,
         hippodrome=hippodrome or None,
@@ -290,10 +293,18 @@ def main() -> None:
     st.title("🐎 HippiquePredictor — méthode V5")
     st.caption("Trot attelé · analyse comparative des 4 piliers et de tous les critères du prompt V5.")
 
-    settings, _, _ = get_services()
+    # Verification de la cle AVANT toute construction du client (evite un crash).
+    settings = load_settings()
     if not settings.has_turfbzh_key:
-        st.error("Clé API turf.bzh absente. Renseigne TURFBZH_API_KEY dans le fichier .env.")
-        return
+        st.error(
+            "**Clé API turf.bzh absente ou invalide.**\n\n"
+            "En ligne (Streamlit Cloud) : ouvre **Manage app → Settings → Secrets** "
+            "et ajoute :\n\n"
+            "```toml\nTURFBZH_API_KEY = \"tbz_live_xxxxxxxx\"\n```\n\n"
+            "En local : renseigne `TURFBZH_API_KEY` dans le fichier `.env` "
+            "(format `tbz_live_...`)."
+        )
+        st.stop()
 
     with st.sidebar:
         st.header("Paramètres")
@@ -314,7 +325,11 @@ def main() -> None:
         if not auto_depth:
             depth = st.slider("Profondeur d'enrichissement", 1, 8, 6)
 
-    races = get_races(date_iso, france_only)
+    try:
+        races = get_races(date_iso, france_only)
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"Impossible de récupérer le programme turf.bzh : {exc}")
+        st.stop()
     if hippo:
         races = [r for r in races if hippo.lower() in str(r.get("hippodrome", "")).lower()]
 
@@ -333,9 +348,13 @@ def main() -> None:
                             format_func=lambda c: labels[c])
         d = depth if depth is not None else 6
         if st.button("Analyser la course", type="primary"):
-            with st.spinner("Collecte et analyse…"):
-                res = analyze(date_iso, code, hippo, enrich, d, actor, with_history)
-            render_full_race(res)
+            try:
+                with st.spinner("Collecte et analyse…"):
+                    res = analyze(date_iso, code, hippo, enrich, d, actor, with_history)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"Erreur pendant l'analyse de {code} : {exc}")
+            else:
+                render_full_race(res)
 
     else:  # Journée complète
         d = depth if depth is not None else 3
