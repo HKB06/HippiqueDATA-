@@ -105,4 +105,23 @@ src/hippique/
   cli.py             # interface ligne de commande
 main.py              # point d'entrée CLI
 streamlit_app.py     # application web
+paristurf_extract.py # extraction édition Paris-Turf (abonné) -> JSON + Word
 ```
+
+## Outil annexe : extraction de l'édition Paris-Turf (abonné)
+
+`paristurf_extract.py` convertit l'édition numérique **que tu fournis toi-même**
+(contenu payant auquel tu es abonné — **aucun scraping de site**) en
+**JSON + Word**, texte intégral page par page.
+
+```powershell
+pip install -r requirements-paristurf.txt
+# Dépose l'édition du jour dans inbox/2026-11-26/ (PDF ou images), puis :
+python paristurf_extract.py --in inbox/2026-11-26 --date 2026-11-26
+```
+
+- **PDF de l'édition** → extraction du vrai texte, fiable (fortement recommandé).
+- **Images / PDF scanné** → OCR automatique (qualité moindre ; inexploitable sur
+  les tableaux denses à basse résolution — préférer le PDF).
+
+Le dossier `inbox/` est ignoré par git (ne jamais committer le contenu payant).

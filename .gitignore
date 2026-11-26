@@ -18,6 +18,9 @@ data/cache/
 out/
 *.log
 
+# Contenu Paris-Turf fourni par l'abonné (NE JAMAIS committer : contenu payant)
+inbox/
+
 # OS / IDE
 .DS_Store
 Thumbs.db

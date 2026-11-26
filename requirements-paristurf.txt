@@ -1,0 +1,10 @@
+# Dependances de l'outil d'extraction Paris-Turf (edition numerique de l'abonne).
+# A installer separement : pip install -r requirements-paristurf.txt
+# (volontairement hors requirements.txt pour ne pas alourdir l'app en ligne)
+
+PyMuPDF>=1.24        # extraction du texte des PDF (et rendu des pages pour OCR)
+python-docx>=1.1     # generation du livrable Word (.docx)
+
+# OCR optionnel : necessaire UNIQUEMENT si tes pages sont des images ou des PDF
+# scannes (sans couche texte). Pip-only, aucun binaire systeme a installer.
+rapidocr-onnxruntime>=1.3
